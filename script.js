@@ -1,4 +1,4 @@
-window.onload = () => {
+window.addEventListener("DOMContentLoaded", () => {
   
   let tasks = [];
   
@@ -17,9 +17,8 @@ window.onload = () => {
   });
   
   function clear() {
-    inputName.value = '';
-    inputNumber.value = '';
-    inputEmail.value = '';
+    const forms = document.querySelectorAll('.form');
+    forms.forEach(form => form.reset());
   }
   
   const btnSubmit = document.querySelector('.btn-submit');
@@ -27,19 +26,11 @@ window.onload = () => {
   
   function insertData() {
     if (modal.textContent.includes('add')) {
-      const name = inputName.value.trim();
-      const number = inputNumber.value.trim();
-      const email = inputEmail.value.trim();
-      if (validate(name, number, email) == true) {
-        const item = {
-          name: name,
-          number: number,
-          email: email
-        };
-        tasks.push(item);
+      const data = getInputValues();
+      if (validate(data) == true) {
+        if (isDataExist(data)) return alerts('error', 'Alert', 'Data is already in the list!');
+        tasks.unshift(data);
         saveToLocalstorage();
-        const result = render(item);
-        content.insertAdjacentHTML('beforeend', result);
         alerts('success', 'Success', 'Data has been added!');
         loadData();
         clear();
@@ -47,7 +38,15 @@ window.onload = () => {
     }
   }
   
-  function validate(name, number, email) {
+  function getInputValues() {
+    return {
+      name: inputName.value.trim(),
+      number: inputNumber.value.trim(),
+      email: inputEmail.value.trim()
+    };
+  }
+  
+  function validate({ name, number, email }) {
     if (!name && !number && !email) return alerts('error', 'Alert', `field's is empty!`);
     if (!name || !number || !email) return alerts('error', 'Alert', `field is empty!`);
     if (name.length < 3) return tooShort('name', 3);
@@ -68,15 +67,39 @@ window.onload = () => {
     return alerts('error', 'Alert', `${name} must be less then ${limit} characrer!`);
   }
   
-  function render({name, number, email}) {
+  function isDataExist({ name, number, email }) {
+    let result = false;
+    tasks.forEach(task => {
+      if (task.name.toLowerCase() == name.toLowerCase() && task.number == number && task.email.toLowerCase() == email.toLowerCase()) result = true;
+      if (task.name.toLowerCase() == name.toLowerCase() && task.number == number && task.email.toLowerCase() != email.toLowerCase()) result = false;
+      if (task.name.toLowerCase() == name.toLowerCase() && task.number != number && task.email.toLowerCase() == email.toLowerCase()) result = false;
+    });
+    return result;
+  }
+  
+  function showUI(data, index = 0) {
+    const result = render(data, index);
+    content.insertAdjacentHTML('beforeend', result);
+  }
+  
+  function render({ name, number, email }, index) {
     return `
     <tr>
       <td class="p-3 fw-light">${name}</td>
       <td class="p-3 fw-light">${number}</td>
       <td class="p-3 fw-light">${email}</td>
       <td class="p-3 fw-light">
-        <button class="btn btn-success btn-sm rounded-0 m-1 btn-edit btn-modal" data-type="edit" data-bs-toggle="modal" data-bs-target="#modalBox">edit</button>
-        <button class="btn btn-danger btn-sm rounded-0 m-1 btn-delete">delete</button>
+        <button 
+          class="btn btn-success btn-sm rounded-0 m-1 btn-edit btn-modal" 
+          data-type="edit" 
+          data-index="${index}"
+          data-bs-toggle="modal" 
+          data-bs-target="#modalBox">edit</button>
+        <button 
+          class="btn btn-danger btn-sm rounded-0 m-1 btn-delete"
+          data-index="${index}">
+          delete
+        </button>
       </td>
     </tr>
     `;
@@ -102,10 +125,7 @@ window.onload = () => {
     content.innerHTML = '';
     const item = localStorage.getItem('crud');
     tasks = (item) ? JSON.parse(item) : [];
-    tasks.forEach(task => {
-      const result = render(task);
-      content.insertAdjacentHTML('beforeend', result);
-    });
+    tasks.forEach((task, index) => showUI(task, index));
   }
   
   loadData();
@@ -113,39 +133,34 @@ window.onload = () => {
   // edit data 
   window.addEventListener('click', event => {
     if (event.target.classList.contains('btn-edit')) {
-      const tr = event.target.parentElement.parentElement;
-      setValue(tr.cells);
-      btnSubmit.addEventListener('click', () => {
-        editData(tr)
-      });
+      const index = event.target.dataset.index;
+      inputName.value = tasks[index].name;
+      inputNumber.value = tasks[index].number;
+      inputEmail.value = tasks[index].email;
+      editData(index);
     }
   });
   
-  function setValue(param) {
-    inputName.value = param[0].textContent;
-    inputNumber.value = param[1].textContent;
-    inputEmail.value = param[2].textContent;
-  }
-  
-  function editData(param) {
-    if (modal.textContent.includes('edit')) {
-      const name = inputName.value.trim();
-      const number = inputNumber.value.trim();
-      const email = inputEmail.value.trim();
-      if (validate(name, number, email) == true) {
-        tasks[param.rowIndex - 1].name = name;
-        tasks[param.rowIndex - 1].number = number;
-        tasks[param.rowIndex - 1].email = email;
-        saveToLocalstorage();
-        alerts('success', 'Success', 'Data has been updated!');
-        loadData();
+  function editData(index) {
+    btnSubmit.addEventListener('click', function() {
+      if (modal.textContent.includes('edit')) {
+        const data = getInputValues();
+        if (validate(data) == true) {
+          if (isDataExist(data)) return alerts('error', 'Alert', 'Data is already in the list!');
+          tasks[index] = data;
+          saveToLocalstorage();
+          alerts('success', 'Success', 'Data has been updated!');
+          loadData();
+          index = null;
+        }
       }
-    }
+    });
   }
   
   // delete data
   window.addEventListener('click', event => {
     if (event.target.classList.contains('btn-delete')) {
+      const index = event.target.dataset.index;
       swal.fire ({
         icon: 'info',
         title: 'are you sure?',
@@ -153,29 +168,30 @@ window.onload = () => {
         showCancelButton: true
       })
       .then(response => {
-        const tr = event.target.parentElement.parentElement;
-        if (response.isConfirmed) deleteData(tr);
+        if (response.isConfirmed) {
+          tasks.splice(index, 1);
+          saveToLocalstorage();
+          alerts('success', 'Success', 'Data has been deleted!');
+          loadData();
+        }
       });
     }
   });
-  
-  function deleteData(param) {
-    tasks.splice((param.rowIndex - 1), 1);
-    saveToLocalstorage();
-    alerts('success', 'Success', 'Data has been deleted!');
-    loadData();
-  }
   
   // search data
   const searchInput = document.querySelector('.search-input');
   searchInput.addEventListener('keyup', function() {
     const value = this.value.trim().toLowerCase();
+    searchData(value);
+  });
+  
+  function searchData(value) {
     const result = Array.from(content.rows);
     result.forEach(data => {
       const str = data.textContent.toLowerCase();
       data.style.display = (str.indexOf(value) != -1) ? '' : 'none';
     });
-  });
+  }
   
   // delete all data
   const btnDeleteAllData = document.querySelector('.btn-all');
@@ -190,7 +206,6 @@ window.onload = () => {
     })
     .then(response => {
       if (response.isConfirmed) {
-        content.innerHTML = '';
         tasks = [];
         saveToLocalstorage();
         alerts('success', 'Success', 'All data has been deleted!');
@@ -199,4 +214,4 @@ window.onload = () => {
     });
   }
   
-}
+});

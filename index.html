@@ -10,14 +10,14 @@
   <title>crud localstorage</title>
 </head>
 <body>
-  
+
   <div class="container">
     <div class="row">
       <div class="col-md my-5">
-        
+
         <!-- title page -->
         <h1 class="fw-normal text-center">CRUD javascript localstorage</h1>
-        
+
         <!-- button and search input -->
         <div class="row my-3">
           <div class="d-flex justify-content-center align-items-center flex-wrap">
@@ -32,7 +32,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- table -->
         <div class="table-responsive">
           <table class="table" cellspacing="0">
@@ -47,7 +47,7 @@
             <tbody class="content"></tbody>
           </table>
         </div>
-        
+
         <!-- footer -->
         <div class="row mt-4">
           <div class="col-md-7 mx-auto text-center">
@@ -59,7 +59,7 @@
             </span>
           </div>
         </div>
-        
+
         <!-- Modal -->
         <div class="modal fade" id="modalBox" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -68,28 +68,30 @@
                 <h1 class="modal-title fs-6 fw-light" id="exampleModalLabel"></h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-              <div class="modal-body">
-                <div class="form-group mb-3">
-                  <label for="name" class="form-label fw-light">Your Name</label>
-                  <input type="text" id="name" class="form-control input-name" placeholder="Your name">
+              <form action="" class="form">
+                <div class="modal-body">
+                  <div class="form-group mb-3">
+                    <label for="name" class="form-label fw-light">Your Name</label>
+                    <input type="text" id="name" class="form-control input-name" placeholder="Your name">
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="number" class="form-label fw-light">Your Phone Number</label>
+                    <input type="text" id="number" class="form-control input-number" placeholder="Your phone number">
+                  </div>
+                  <div class="form-group">
+                    <label for="email" class="form-label fw-light">Your Email Address</label>
+                    <input type="text" id="email" class="form-control input-email" placeholder="Example@example.com">
+                  </div>
                 </div>
-                <div class="form-group mb-3">
-                  <label for="number" class="form-label fw-light">Your Phone Number</label>
-                  <input type="text" id="number" class="form-control input-number" placeholder="Your phone number">
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary rounded-1" data-bs-dismiss="modal">close</button>
+                  <button type="button" class="btn btn-primary rounded-1 btn-submit">submit</button>
                 </div>
-                <div class="form-group">
-                  <label for="email" class="form-label fw-light">Your Email Address</label>
-                  <input type="text" id="email" class="form-control input-email" placeholder="Example@example.com">
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary rounded-1" data-bs-dismiss="modal">close</button>
-                <button type="button" class="btn btn-primary rounded-1 btn-submit">submit</button>
-              </div>
+              </form>
             </div>
           </div>
         </div>
-        
+
       </div>
     </div>
   </div>
